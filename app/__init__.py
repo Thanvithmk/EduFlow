@@ -32,7 +32,8 @@ def create_app():
     from app.models.schedule_model import Schedule
 
     from app.routes.auth_routes import auth_bp
+    from app.routes.task_routes import tasks_bp
     app.register_blueprint(auth_bp)
-    
+    app.register_blueprint(tasks_bp)
 
     return app
