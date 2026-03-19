@@ -2,6 +2,9 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
+import os
+
+from app.utils.extensions import bcrypt, jwt
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -13,11 +16,14 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/eduflow_db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'your_secret_key_here'
+    app.config.setdefault("JWT_SECRET_KEY", os.environ.get("JWT_SECRET_KEY") or app.config["SECRET_KEY"])
 
     # Extensions
     db.init_app(app)
     migrate.init_app(app, db)
     CORS(app)
+    bcrypt.init_app(app)
+    jwt.init_app(app)
 
     # Import models
     from app.models.user_model import User
@@ -25,6 +31,8 @@ def create_app():
     from app.models.fixed_model import FixedCommitment
     from app.models.schedule_model import Schedule
 
+    from app.routes.auth_routes import auth_bp
+    app.register_blueprint(auth_bp)
     
 
     return app
