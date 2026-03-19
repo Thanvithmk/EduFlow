@@ -1,0 +1,21 @@
+# Core Framework
+Flask
+python-dotenv
+
+# Production Server (Choose Gunicorn for Mac/Linux or Waitress for Windows)
+gunicorn 
+
+# Database & Migrations
+Flask-SQLAlchemy
+Flask-Migrate
+
+# Security & Data Validation
+Flask-WTF
+email-validator
+Flask-Bcrypt
+
+# Cross-Origin Resource Sharing (Essential for APIs)
+Flask-CORS
+
+# JWT Authentication
+Flask-JWT-Extended
