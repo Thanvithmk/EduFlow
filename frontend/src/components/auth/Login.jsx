@@ -1,81 +1,73 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { loginUser } from '../../services/api.js'
-import { useAuth } from './useAuth.js'
+import React, { useState } from 'react';
+import { loginUser } from '../../services/api';
+import { useNavigate, Link } from 'react-router-dom';
 
-export default function Login() {
-  const navigate = useNavigate()
-  const { setToken } = useAuth()
+const Login = () => {
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
-
-  const onSubmit = async (e) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
-      const data = await loginUser({ email, password })
-      if (!data?.token) {
-        setError(data?.message || 'Login failed')
-        return
-      }
-      setToken(data.token)
-      navigate('/dashboard')
+      const data = await loginUser(formData);
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      navigate('/dashboard');
     } catch (err) {
-      const msg = err?.response?.data?.message || 'Login failed'
-      setError(msg)
+      setError(err.response?.data?.msg || 'Invalid email or password');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="pageWrap">
-      <div className="card authCard">
-        <h1 className="pageTitle">Login</h1>
-        <form className="form" onSubmit={onSubmit}>
-          <label className="label">
-            Email
-            <input
-              className="input"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              required
-            />
-          </label>
-          <label className="label">
-            Password
-            <input
-              className="input"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-            />
-          </label>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-900">
+      <div className="auth-card">
+        <div className="text-center mb-10">
+          <h2 className="text-4xl font-extrabold text-white tracking-tight">EduFlow</h2>
+          <p className="text-gray-400 mt-2">Welcome back, login to your account</p>
+        </div>
 
-          {error ? <div className="errorText">{error}</div> : null}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-xl mb-6 text-sm text-center">
+            {error}
+          </div>
+        )}
 
-          <button className="button" type="submit" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="form-label">Email Address</label>
+            <input 
+              type="email" required className="studysync-input"
+              placeholder="thanvith@example.com"
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+            />
+          </div>
+
+          <div>
+            <label className="form-label">Password</label>
+            <input 
+              type="password" required className="studysync-input"
+              placeholder="••••••••"
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+            />
+          </div>
+
+          <button type="submit" disabled={loading} className="btn-primary">
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <div className="authFooter">
-          <span>New here?</span>
-          <Link to="/register" className="link">
-            Register
-          </Link>
-        </div>
+        <p className="mt-8 text-center text-gray-400 text-sm">
+          New here? <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium">Create account</Link>
+        </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
+export default Login;

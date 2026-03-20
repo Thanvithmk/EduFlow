@@ -1,31 +1,40 @@
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import Dashboard from './components/dashboard/Dashboard';
 
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import AuthProvider from './components/auth/AuthContext.jsx'
-import Login from './components/auth/Login.jsx'
-import Register from './components/auth/Register.jsx'
-import ProtectedLayout from './components/dashboard/ProtectedLayout.jsx'
-import Dashboard from './components/dashboard/Dashboard.jsx'
+// A simple component to protect our private routes
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
-export default function App() {
+function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <Router>
+      <div className="bg-gray-900 min-h-screen">
         <Routes>
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedLayout>
-                <Dashboard />
-              </ProtectedLayout>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
+
+          {/* Protected Routes (Dashboard, Tasks, etc.) */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Default Route */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
-  )
+      </div>
+    </Router>
+  );
 }
+
+export default App;

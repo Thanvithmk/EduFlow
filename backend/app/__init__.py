@@ -23,7 +23,11 @@ def create_app():
     # Extensions
     db.init_app(app)
     migrate.init_app(app, db)
-    CORS(app)
+    CORS(app, resources={r"/*": {
+    "origins": ["http://localhost:5173", "http://127.0.0.1:5173", "http://[::1]:5173"],
+    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Origin"]
+}}, supports_credentials=True)
     bcrypt.init_app(app)
     jwt.init_app(app)
 

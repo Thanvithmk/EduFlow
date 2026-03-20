@@ -1,91 +1,81 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { registerUser } from '../../services/api.js'
+import React, { useState } from 'react';
+import { registerUser } from '../../services/api';
+import { useNavigate, Link } from 'react-router-dom';
 
-export default function Register() {
-  const navigate = useNavigate()
 
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+const Register = () => {
+  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
-  const [loading, setLoading] = useState(false)
-
-  const onSubmit = async (e) => {
-    e.preventDefault()
-    setError(null)
-    setSuccess(null)
-    setLoading(true)
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
-      const data = await registerUser({ name, email, password })
-      if (data?.message) setSuccess(data.message)
-      navigate('/login')
+      await registerUser(formData);
+      navigate('/login');
     } catch (err) {
-      const msg = err?.response?.data?.message || 'Registration failed'
-      setError(msg)
+      setError(err.response?.data?.msg || 'Registration failed. Try again.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="pageWrap">
-      <div className="card authCard">
-        <h1 className="pageTitle">Register</h1>
-        <form className="form" onSubmit={onSubmit}>
-          <label className="label">
-            Name
-            <input
-              className="input"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="name"
-              required
-            />
-          </label>
-          <label className="label">
-            Email
-            <input
-              className="input"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              required
-            />
-          </label>
-          <label className="label">
-            Password
-            <input
-              className="input"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              required
-            />
-          </label>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-900">
+      <div className="auth-card">
+        <div className="text-center mb-10">
+          <h2 className="text-4xl font-extrabold text-white tracking-tight">Join EduFlow</h2>
+          <p className="text-gray-400 mt-2">Get started with AI academic planning</p>
+        </div>
 
-          {error ? <div className="errorText">{error}</div> : null}
-          {success ? <div className="successText">{success}</div> : null}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-xl mb-6 text-sm text-center">
+            {error}
+          </div>
+        )}
 
-          <button className="button" type="submit" disabled={loading}>
-            {loading ? 'Creating account...' : 'Create account'}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="form-label">Full Name</label>
+            <input 
+              type="text" required className="studysync-input"
+              placeholder="Thanvith MK"
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+            />
+          </div>
+
+          <div>
+            <label className="form-label">Email Address</label>
+            <input 
+              type="email" required className="studysync-input"
+              placeholder="thanvith@example.com"
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+            />
+          </div>
+
+          <div>
+            <label className="form-label">Password</label>
+            <input 
+              type="password" required className="studysync-input"
+              placeholder="••••••••"
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+            />
+          </div>
+
+          <button type="submit" disabled={loading} className="btn-primary mt-2">
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
-        <div className="authFooter">
-          <span>Already have an account?</span>
-          <Link to="/login" className="link">
-            Login
-          </Link>
-        </div>
+        <p className="mt-8 text-center text-gray-400 text-sm">
+          Already have an account? <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium">Login</Link>
+        </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
+export default Register;
