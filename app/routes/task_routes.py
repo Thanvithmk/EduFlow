@@ -6,6 +6,7 @@ from app import db
 from app.models.task_model import Task
 
 
+
 tasks_bp = Blueprint("tasks", __name__)
 
 
@@ -100,3 +101,37 @@ def delete_task(task_id: int):
 
     return jsonify({"message": "Task deleted"}), 200
 
+#ML
+
+from app.services.ml_service import predict_time
+
+tasks_ml_bp = Blueprint("tasks_ml", __name__)
+
+@tasks_ml_bp.post("/tasks/predict")
+def predict_task():
+    data = request.get_json()
+    user_id = get_user_id_from_request()
+    if user_id is None:
+        return jsonify({"message": "Invalid or missing token"}), 401 # Unauthorized
+    if not data:
+        return jsonify({"success": False, "error": "No data provided"}), 400
+    
+    try:
+        if not (1 <= int(data.get('complexity', 0)) <= 4):
+            return jsonify({"success": False, "error": "Complexity must be 1-4"}), 400
+        if not (1 <= int(data.get('size_metric', 0)) <= 5):
+            return jsonify({"success": False, "error": "Size metric must be 1-5"}), 400
+        
+        estimated_hours = predict_time(data)
+        
+        return jsonify({
+            "success": True,
+            "data": {
+                "estimated_hours": estimated_hours
+            }
+        }), 200
+
+    except ValueError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": "Internal model error"}), 500
