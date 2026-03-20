@@ -3,9 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 import os
+from flask_jwt_extended import JWTManager
+from flask_bcrypt import Bcrypt
 
-from app.utils.extensions import bcrypt, jwt
-
+jwt = JWTManager()
+bcrypt = Bcrypt()
 db = SQLAlchemy()
 migrate = Migrate()
 

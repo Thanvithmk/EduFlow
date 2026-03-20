@@ -5,12 +5,6 @@ from app.utils.jwt_utils import get_user_id_from_request
 from app import db
 from app.models.task_model import Task
 
-from app.services.task_service import (
-    create_task,
-    delete_task_for_user,
-    get_tasks_for_user,
-)
-
 
 tasks_bp = Blueprint("tasks", __name__)
 
