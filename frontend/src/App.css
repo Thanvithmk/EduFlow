@@ -182,3 +182,320 @@
     border-right-color: var(--border);
   }
 }
+
+/* EduFlow UI (React app) */
+.pageWrap {
+  padding: 24px 16px;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.cardPad {
+  padding: 18px;
+}
+
+.authCard {
+  width: 520px;
+}
+
+.pageTitle {
+  margin: 0 0 14px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  font-weight: 500;
+}
+
+.input,
+.select {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 16px;
+  background: #fff;
+  color: var(--text-h);
+}
+
+.button {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.buttonWide {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.errorText {
+  color: #dc2626;
+  font-weight: 600;
+  text-align: left;
+}
+
+.successText {
+  color: #059669;
+  font-weight: 600;
+  text-align: left;
+}
+
+.authFooter {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+}
+
+.link {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+}
+
+.gridTop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.stackSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  text-align: left;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.resultBox {
+  border: 1px dashed rgba(14, 165, 233, 0.35);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.resultPlaceholder {
+  color: var(--text);
+  text-align: left;
+}
+
+.resultContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resultRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.resultLabel {
+  font-weight: 600;
+  text-align: left;
+}
+
+.resultValue {
+  font-weight: 800;
+}
+
+.hintText {
+  margin-top: 8px;
+  text-align: left;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.mutedText {
+  color: var(--text);
+}
+
+.navBar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+
+.navInner {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  font-weight: 900;
+  cursor: pointer;
+  color: var(--text-h);
+}
+
+.navLinks {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.navLinkButton {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.navLinkButton:hover {
+  border-color: var(--accent);
+}
+
+.navLogout {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+.contentWrap {
+  flex: 1;
+}
+
+.appRoot {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.table th {
+  font-weight: 900;
+}
+
+.statusPill {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #1d4ed8;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.deleteButton {
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+.deleteButtonDanger {
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+.sectionHeaderRow,
+.listHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.listTitle {
+  margin: 0;
+  font-size: 18px;
+  text-align: left;
+}
+
+.colDelete {
+  width: 72px;
+}
+
+@media (max-width: 900px) {
+  .gridTop,
+  .stackSection {
+    grid-template-columns: 1fr;
+  }
+
+  .twoCol {
+    grid-template-columns: 1fr;
+  }
+
+  .authCard {
+    width: 100%;
+  }
+}
