@@ -35,7 +35,8 @@ def create_app():
 
     from app.routes.auth_routes import auth_bp
     from app.routes.task_routes import tasks_bp
+    from app.routes.fixed_routes import fixed_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(tasks_bp)
-
+    app.register_blueprint(fixed_bp)
     return app
