@@ -12,6 +12,6 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
-    tasks = db.relationship("Task", backref="user", lazy=True)
+    tasks = db.relationship("Task", backref="user", lazy=True) #relationship = shortcut to avoid writing queries again and again
     fixed_commitments = db.relationship("FixedCommitment", backref="user", lazy=True)
     schedules = db.relationship("Schedule", backref="user", lazy=True)
