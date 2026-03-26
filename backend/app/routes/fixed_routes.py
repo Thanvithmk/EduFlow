@@ -30,7 +30,7 @@ def save_fixed():
 
     try:
     # Use datetime.strptime then call .time() to get a time object
-        start_time = datetime.strptime(start_time, "%H:%M").time()
+        start_time = datetime.strptime(start_time, "%H:%M").time() ## Parse string (HH:MM) → datetime → extract time
         end_time = datetime.strptime(end_time, "%H:%M").time()
     except (TypeError, ValueError):
         return jsonify({"message": "Invalid time format. Use HH:MM"}), 400
@@ -39,7 +39,7 @@ def save_fixed():
     if user_id is None:
         return jsonify({"message": "Invalid or missing token"}), 401 # Unauthorized
 
-    fixed = FixedCommitment(
+    fixed = FixedCommitment( #fixed is a variable that stores the object I just created
         user_id=user_id,
         title=data["title"],
         start_time=start_time,
@@ -47,7 +47,7 @@ def save_fixed():
         type=type,
     )
 
-    db.session.add(fixed)
+    db.session.add(fixed) #SQLAlchemy needs the object to insert into DB 
     db.session.commit()
 
     return jsonify({"message": "Fixed commitment created successfully"}), 201

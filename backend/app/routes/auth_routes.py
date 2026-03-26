@@ -15,7 +15,7 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.post("/register")
 def register():
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True) or {} #request.json → quick but risky ; request.get_json(silent=True) → safe & controlled
 
     name = (data.get("name") or "").strip()
     email = (data.get("email") or "").strip().lower()
@@ -24,11 +24,11 @@ def register():
     if not name or not email or not password:
         return jsonify({"message": "Missing required fields"}), 400
 
-    existing_user = User.query.filter_by(email=email).first()
+    existing_user = User.query.filter_by(email=email).first() #Give me only the first matching result
     if existing_user:
         return jsonify({"message": "Email already registered"}), 409
 
-    password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+    password_hash = bcrypt.generate_password_hash(password).decode("utf-8") #UTF-8 is just an encoding format : It tells Python how to convert bytes into readable text
     user = User(name=name, email=email, password_hash=password_hash)
     db.session.add(user)
     db.session.commit()
