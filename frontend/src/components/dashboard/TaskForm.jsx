@@ -1,178 +1,126 @@
-import { useMemo, useState } from 'react'
+import React, { useState } from 'react';
+import { predictTask } from '../../services/api';
 
-const TASK_TYPE_OPTIONS = [
-  'programming',
-  'research',
-  'presentation',
-  'lab_work',
-  'exam_preparation',
-  'project',
-]
+export default function TaskForm({ onPredict }) {
+  const token = localStorage.getItem('token');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-const SUBJECT_OPTIONS = [
-  'machine_learning',
-  'computer_science',
-  'data_science',
-  'software_engineering',
-  'web_development',
-  'database_systems',
-  'mathematics',
-]
+  // 🎯 Initial state based on technical requirements [cite: 161]
+  const [formData, setFormData] = useState({
+    title: "",
+    task_type: "programming",
+    subject: "machine_learning",
+    complexity: 1,
+    size_metric: 1,
+    team_size: 1,
+    days_until_due: 1
+  });
 
-export default function TaskForm({ onGetEstimate, busy }) {
-  const [title, setTitle] = useState('')
-  const [task_type, setTaskType] = useState('programming')
-  const [subject, setSubject] = useState('machine_learning')
-  const [complexity, setComplexity] = useState(3)
-  const [size_metric, setSizeMetric] = useState(2)
-  const [team_size, setTeamSize] = useState(1)
-  const [days_until_due, setDaysUntilDue] = useState(5)
+  const handleGetEstimate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-  const [error, setError] = useState(null)
+    // ⚠ No title sent here as per documentation 
+    const mlFeatures = {
+      task_type: formData.task_type,
+      subject: formData.subject,
+      complexity: Number(formData.complexity),
+      size_metric: Number(formData.size_metric),
+      team_size: Number(formData.team_size),
+      days_until_due: Number(formData.days_until_due)
+    };
 
-  const canSubmit = useMemo(() => {
-    if (!title.trim()) return false
-    if (!task_type) return false
-    if (!subject) return false
-    return true
-  }, [title, task_type, subject])
-
-  const onSubmit = (e) => {
-    e.preventDefault()
-    setError(null)
-
-    if (!canSubmit) {
-      setError('Please complete the required fields.')
-      return
+    try {
+      // Sends POST /predict with filtered features [cite: 164]
+      const response = await predictTask(mlFeatures, token);
+      
+      // Pass the result (estimated_hours) and current form data up to Dashboard
+      // This allows PredictionResult to have the title when saving later 
+      onPredict({
+        ...response.data,
+        fullTaskDetails: formData 
+      });
+    } catch (err) {
+      setError("Failed to get ML estimate. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    if (onGetEstimate) {
-      onGetEstimate({
-        title,
-        task_type,
-        subject,
-        complexity,
-        size_metric,
-        team_size,
-        days_until_due,
-      })
-    }
-  }
+  };
 
   return (
-    <div>
-      <h2 className="sectionTitle">Add New Task</h2>
-      <form className="form" onSubmit={onSubmit}>
-        <label className="label">
-          Title
+    <form onSubmit={handleGetEstimate} className="space-y-4">
+      <div className="flex flex-col gap-1">
+        <label className="text-sm text-gray-400">Task Title</label>
+        <input
+          className="p-2 bg-gray-900 rounded border border-gray-700 outline-none focus:border-blue-500"
+          type="text"
+          placeholder="e.g., NLP Assignment"
+          value={formData.title}
+          onChange={(e) => setFormData({...formData, title: e.target.value})}
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-gray-400">Type</label>
+          <select 
+            className="p-2 bg-gray-900 rounded border border-gray-700 outline-none"
+            value={formData.task_type}
+            onChange={(e) => setFormData({...formData, task_type: e.target.value})}
+          >
+            <option value="programming">Programming</option>
+            <option value="research">Research</option>
+            <option value="theory">Theory</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-gray-400">Subject</label>
+          <select 
+            className="p-2 bg-gray-900 rounded border border-gray-700 outline-none"
+            value={formData.subject}
+            onChange={(e) => setFormData({...formData, subject: e.target.value})}
+          >
+            <option value="machine_learning">Machine Learning</option>
+            <option value="data_structures">Data Structures</option>
+            <option value="web_dev">Web Development</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-gray-400">Complexity (1-5)</label>
           <input
-            className="input"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="NLP Assignment"
-            required
+            type="number" min="1" max="5"
+            className="p-2 bg-gray-900 rounded border border-gray-700"
+            value={formData.complexity}
+            onChange={(e) => setFormData({...formData, complexity: e.target.value})}
           />
-        </label>
-
-        <label className="label">
-          Task Type
-          <select
-            className="select"
-            value={task_type}
-            onChange={(e) => setTaskType(e.target.value)}
-          >
-            {TASK_TYPE_OPTIONS.map((v) => (
-              <option value={v} key={v}>
-                {v.replaceAll('_', ' ')}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="label">
-          Subject
-          <select
-            className="select"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          >
-            {SUBJECT_OPTIONS.map((v) => (
-              <option value={v} key={v}>
-                {v.replaceAll('_', ' ')}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="twoCol">
-          <label className="label">
-            Complexity (1-4)
-            <select
-              className="select"
-              value={complexity}
-              onChange={(e) => setComplexity(Number(e.target.value))}
-            >
-              {[1, 2, 3, 4].map((v) => (
-                <option value={v} key={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="label">
-            Size Metric (1-5)
-            <select
-              className="select"
-              value={size_metric}
-              onChange={(e) => setSizeMetric(Number(e.target.value))}
-            >
-              {[1, 2, 3, 4, 5].map((v) => (
-                <option value={v} key={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
         </div>
-
-        <div className="twoCol">
-          <label className="label">
-            Team Size (1-10)
-            <select
-              className="select"
-              value={team_size}
-              onChange={(e) => setTeamSize(Number(e.target.value))}
-            >
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((v) => (
-                <option value={v} key={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="label">
-            Days Until Due
-            <input
-              className="input"
-              type="number"
-              min={1}
-              value={days_until_due}
-              onChange={(e) => setDaysUntilDue(Number(e.target.value))}
-              required
-            />
-          </label>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-gray-400">Days Until Due</label>
+          <input
+            type="number" min="1"
+            className="p-2 bg-gray-900 rounded border border-gray-700"
+            value={formData.days_until_due}
+            onChange={(e) => setFormData({...formData, days_until_due: e.target.value})}
+          />
         </div>
+      </div>
 
-        {error ? <div className="errorText">{error}</div> : null}
+      {error && <p className="text-red-400 text-xs">{error}</p>}
 
-        <button className="button" type="submit" disabled={busy || !canSubmit}>
-          {busy ? 'Getting estimate...' : 'Get Estimate'}
-        </button>
-      </form>
-    </div>
-  )
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition duration-200 disabled:opacity-50"
+      >
+        {loading ? "Analyzing..." : "Get AI Estimate"}
+      </button>
+    </form>
+  );
 }
-

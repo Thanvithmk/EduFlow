@@ -1,185 +1,107 @@
-import { useEffect, useMemo, useState } from 'react'
-import {
-  addFixedCommitment,
-  deleteFixedCommitment,
-  getFixedCommitments,
-} from '../../services/api.js'
+import React, { useState, useEffect } from 'react';
+import { addFixedCommitment, getFixedCommitments } from '../../services/api';
 
-export default function FixedCommitments({ token, reloadTick }) {
-  const [title, setTitle] = useState('')
-  const [start_time, setStartTime] = useState('09:00')
-  const [end_time, setEndTime] = useState('17:00')
-  const [type, setType] = useState('academic')
+export default function FixedCommitments() {
+  const [commitments, setCommitments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const token = localStorage.getItem('token');
 
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [saving, setSaving] = useState(false)
-  const [localTick, setLocalTick] = useState(0)
+  const [formData, setFormData] = useState({
+    title: "",
+    start_time: "",
+    end_time: "",
+    type: "academic"
+  });
 
-  const tick = useMemo(() => `${reloadTick}-${localTick}`, [reloadTick, localTick])
+  // Fixed fetch function without citation tags
+  const fetchCommitments = async () => {
+    try {
+      const data = await getFixedCommitments(token);
+      setCommitments(data);
+    } catch (err) {
+      console.error("Failed to load commitments");
+    }
+  };
 
   useEffect(() => {
-    let alive = true
-    const run = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const data = await getFixedCommitments(token)
-        if (alive) setItems(Array.isArray(data) ? data : [])
-      } catch (err) {
-        if (alive)
-          setError(err?.response?.data?.message || 'Failed to load commitments')
-      }
+    fetchCommitments();
+  }, []);
 
-      if (alive) setLoading(false)
-    }
-
-    run()
-    return () => {
-      alive = false
-    }
-  }, [token, tick])
-
-  const onAdd = async (e) => {
-    e.preventDefault()
-    setError(null)
-    setSaving(true)
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
     try {
-      const payload = { title, start_time, end_time, type }
-      await addFixedCommitment(payload, token)
-      setTitle('')
-      setLocalTick((n) => n + 1)
+      await addFixedCommitment(formData, token);
+      setFormData({ title: "", start_time: "", end_time: "", type: "academic" });
+      fetchCommitments();
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to add commitment')
+      alert("Failed to add commitment");
     } finally {
-      setSaving(false)
+      setLoading(false);
     }
-  }
-
-  const onDelete = async (fixedCommitmentId) => {
-    setError(null)
-    try {
-      await deleteFixedCommitment(fixedCommitmentId, token)
-      setLocalTick((n) => n + 1)
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to delete commitment')
-    }
-  }
+  };
 
   return (
-    <section className="card" id="fixed-commitments">
-      <div className="sectionHeaderRow">
-        <h2 className="sectionTitle">Fixed Daily Commitments</h2>
-      </div>
-
-      <form className="subForm" onSubmit={onAdd}>
-        <div className="twoCol">
-          <label className="label">
-            Title
-            <input
-              className="input"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="College Classes"
-              required
-            />
-          </label>
-          <label className="label">
-            Type
-            <select
-              className="select"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-            >
-              <option value="academic">academic</option>
-              <option value="study">study</option>
-              <option value="break">break</option>
-            </select>
-          </label>
+    <div className="flex flex-col h-full space-y-4 text-white">
+      <form onSubmit={handleSubmit} className="space-y-3 pb-4 border-b border-gray-700">
+        <input
+          className="w-full p-2 bg-gray-900 rounded border border-gray-700 text-sm outline-none focus:border-teal-500 text-white"
+          placeholder="Commitment Title (e.g. Gym)"
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          required
+        />
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            type="time"
+            className="p-2 bg-gray-900 rounded border border-gray-700 text-sm text-white"
+            value={formData.start_time}
+            onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+            required
+          />
+          <input
+            type="time"
+            className="p-2 bg-gray-900 rounded border border-gray-700 text-sm text-white"
+            value={formData.end_time}
+            onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+            required
+          />
         </div>
-
-        <div className="twoCol">
-          <label className="label">
-            Start Time (HH:MM)
-            <input
-              className="input"
-              type="time"
-              value={start_time}
-              onChange={(e) => setStartTime(e.target.value)}
-              required
-            />
-          </label>
-          <label className="label">
-            End Time (HH:MM)
-            <input
-              className="input"
-              type="time"
-              value={end_time}
-              onChange={(e) => setEndTime(e.target.value)}
-              required
-            />
-          </label>
-        </div>
-
-        <button className="button buttonWide" type="submit" disabled={saving}>
-          {saving ? 'Adding...' : 'Add Commitment'}
+        <select
+          className="w-full p-2 bg-gray-900 rounded border border-gray-700 text-sm text-white"
+          value={formData.type}
+          onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+        >
+          <option value="academic">Academic (Classes)</option>
+          <option value="personal">Personal</option>
+          <option value="health">Health (Gym/Meals)</option>
+        </select>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-2 rounded transition disabled:opacity-50"
+        >
+          {loading ? "Adding..." : "Add Commitment"}
         </button>
       </form>
 
-      {error ? <div className="errorText">{error}</div> : null}
-
-      <div className="listHeaderRow">
-        <h3 className="listTitle">Existing Commitments</h3>
+      <div className="flex-1 overflow-y-auto max-h-[200px] space-y-2 pr-2">
+        {commitments.length > 0 ? (
+          commitments.map((item, index) => (
+            <div key={index} className="flex justify-between items-center p-2 bg-gray-700/30 rounded border border-gray-700/50">
+              <div>
+                <p className="text-sm font-semibold text-teal-100">{item.title}</p>
+                <p className="text-[10px] text-gray-400">{item.start_time} - {item.end_time}</p>
+              </div>
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-600 uppercase">
+                {item.type}
+              </span>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-600 text-xs py-4 italic">No fixed commitments added.</p>
+        )}
       </div>
-
-      {loading ? <div className="mutedText">Loading...</div> : null}
-      {!loading && !error ? (
-        <div className="tableWrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Start</th>
-                <th>End</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th className="colDelete">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="mutedText">
-                    No fixed commitments yet.
-                  </td>
-                </tr>
-              ) : (
-                items.map((c) => (
-                  <tr key={c.id}>
-                    <td>{c.start_time}</td>
-                    <td>{c.end_time}</td>
-                    <td>{c.title}</td>
-                    <td>{c.type}</td>
-                    <td className="colDelete">
-                      <button
-                        className="deleteButton deleteButtonDanger"
-                        type="button"
-                        onClick={() => onDelete(c.id)}
-                        aria-label={`Delete commitment ${c.title}`}
-                      >
-                        ×
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
-    </section>
-  )
+    </div>
+  );
 }
-

@@ -1,73 +1,82 @@
-import React, { useState } from 'react';
-import { loginUser } from '../../services/api';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { loginUser } from '../../services/api.js';
 
-const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function Login() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(null);
     setLoading(true);
+
     try {
-      const data = await loginUser(formData);
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      navigate('/dashboard');
+      // Sends: { email, password } to POST /login [cite: 140, 143]
+      const data = await loginUser({ email, password });
+      
+      if (data?.token) {
+        // Save token in localStorage [cite: 147]
+        localStorage.setItem('token', data.token);
+        // Redirect to Dashboard [cite: 148]
+        navigate('/dashboard');
+      } else {
+        setError(data?.message || 'Login failed');
+      }
     } catch (err) {
-      setError(err.response?.data?.msg || 'Invalid email or password');
+      setError(err?.response?.data?.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-900">
-      <div className="auth-card">
-        <div className="text-center mb-10">
-          <h2 className="text-4xl font-extrabold text-white tracking-tight">EduFlow</h2>
-          <p className="text-gray-400 mt-2">Welcome back, login to your account</p>
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-xl mb-6 text-sm text-center">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="form-label">Email Address</label>
-            <input 
-              type="email" required className="studysync-input"
-              placeholder="thanvith@example.com"
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+    <div className="pageWrap flex items-center justify-center min-h-screen">
+      <div className="card authCard bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-700 w-full max-w-md">
+        <h1 className="pageTitle text-2xl font-bold mb-6 text-center">Login</h1>
+        <form className="form flex flex-col gap-4" onSubmit={onSubmit}>
+          <label className="label flex flex-col gap-1">
+            Email
+            <input
+              className="input p-2 bg-gray-900 rounded border border-gray-700 outline-none focus:border-blue-500"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
-          </div>
-
-          <div>
-            <label className="form-label">Password</label>
-            <input 
-              type="password" required className="studysync-input"
-              placeholder="••••••••"
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+          </label>
+          <label className="label flex flex-col gap-1">
+            Password
+            <input
+              className="input p-2 bg-gray-900 rounded border border-gray-700 outline-none focus:border-blue-500"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
-          </div>
+          </label>
 
-          <button type="submit" disabled={loading} className="btn-primary">
-            {loading ? 'Signing in...' : 'Sign In'}
+          {error && <div className="errorText text-red-400 text-sm">{error}</div>}
+
+          <button 
+            className="button bg-blue-600 hover:bg-blue-700 transition p-2 rounded font-bold mt-2" 
+            type="submit" 
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
-        <p className="mt-8 text-center text-gray-400 text-sm">
-          New here? <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium">Create account</Link>
-        </p>
+        <div className="authFooter mt-6 text-center text-sm text-gray-400">
+          <span>New here? </span>
+          <Link to="/register" className="link text-blue-400 hover:underline">
+            Register
+          </Link>
+        </div>
       </div>
     </div>
   );
-};
-
-export default Login;
+}

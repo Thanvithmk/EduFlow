@@ -1,103 +1,83 @@
-import { useEffect, useMemo, useState } from 'react'
-import { deleteTask, getTasks } from '../../services/api.js'
+import React, { useEffect, useState } from 'react';
+import { getTasks, deleteTask } from '../../services/api';
 
-export default function TaskList({ token, reloadTick }) {
-  const [loading, setLoading] = useState(true)
-  const [tasks, setTasks] = useState([])
-  const [error, setError] = useState(null)
-  const [localTick, setLocalTick] = useState(0)
+export default function TaskList() {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const token = localStorage.getItem('token');
 
-  const tick = useMemo(() => `${reloadTick}-${localTick}`, [reloadTick, localTick])
+  // 🔄 On Page Load: Fetch tasks from Backend
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const data = await getTasks(token); // GET /tasks
+      setTasks(data); 
+    } catch (err) {
+      setError("Failed to load tasks.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let alive = true
-    const run = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const data = await getTasks(token)
-        if (alive) setTasks(Array.isArray(data) ? data : [])
-      } catch (err) {
-        if (alive)
-          setError(err?.response?.data?.message || 'Failed to load tasks')
-      }
+    fetchTasks();
+  }, []);
 
-      if (alive) setLoading(false)
-    }
-
-    run()
-    return () => {
-      alive = false
-    }
-  }, [token, tick])
-
-  const onDelete = async (taskId) => {
-    setError(null)
+  // 🗑 Delete Task: DELETE /tasks/:id
+  const handleDelete = async (taskId) => {
+    if (!window.confirm("Are you sure you want to remove this task?")) return;
+    
     try {
-      await deleteTask(taskId, token)
-      setLocalTick((n) => n + 1)
+      await deleteTask(taskId, token);
+      // Update local state to reflect deletion
+      setTasks(tasks.filter(task => task.id !== taskId));
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to delete task')
+      alert("Failed to delete task.");
     }
-  }
+  };
+
+  if (loading) return <div className="text-gray-400 p-4">Loading tasks...</div>;
 
   return (
-    <section className="card">
-      <div className="sectionHeaderRow">
-        <h2 className="sectionTitle">Saved Tasks</h2>
-      </div>
-
-      {loading ? <div className="mutedText">Loading...</div> : null}
-      {error ? <div className="errorText">{error}</div> : null}
-
-      {!loading && !error ? (
-        <div className="tableWrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th className="colId">ID</th>
-                <th>Task Name</th>
-                <th className="colNum">Hours</th>
-                <th className="colNum">Due</th>
-                <th className="colStatus">Status</th>
-                <th className="colDelete">Delete</th>
+    <div className="overflow-x-auto">
+      {error && <p className="text-red-400 mb-2 text-sm">{error}</p>}
+      
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="border-b border-gray-700 text-gray-400 text-sm uppercase">
+            <th className="py-3 px-4 font-medium">Task Title</th>
+            <th className="py-3 px-4 font-medium">Est. Hours</th>
+            <th className="py-3 px-4 font-medium">Due (Days)</th>
+            <th className="py-3 px-4 font-medium text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
+              <tr key={task.id} className="border-b border-gray-800 hover:bg-gray-700/30 transition">
+                <td className="py-3 px-4 font-semibold text-blue-100">{task.title}</td>
+                <td className="py-3 px-4 text-gray-300">{task.predicted_hours}h</td>
+                <td className="py-3 px-4 text-gray-300">{task.days_until_due}</td>
+                <td className="py-3 px-4 text-right">
+                  <button 
+                    onClick={() => handleDelete(task.id)}
+                    className="text-red-400 hover:text-red-300 text-sm font-medium transition"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {tasks.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="mutedText">
-                    No tasks saved yet.
-                  </td>
-                </tr>
-              ) : (
-                tasks.map((t) => (
-                  <tr key={t.id}>
-                    <td className="colId">{t.id}</td>
-                    <td>{t.title}</td>
-                    <td className="colNum">{t.predicted_hours}</td>
-                    <td className="colNum">{t.days_until_due}d</td>
-                    <td className="colStatus">
-                      <span className="statusPill">Pending</span>
-                    </td>
-                    <td className="colDelete">
-                      <button
-                        className="deleteButton"
-                        type="button"
-                        onClick={() => onDelete(t.id)}
-                        aria-label={`Delete task ${t.title}`}
-                      >
-                        ×
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
-    </section>
-  )
+            ))
+          ) : (
+            <tr>
+              <td colSpan="4" className="py-8 text-center text-gray-500 italic">
+                No tasks added yet. Get an estimate to start.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
 }
-

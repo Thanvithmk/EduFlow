@@ -1,81 +1,89 @@
-import React, { useState } from 'react';
-import { registerUser } from '../../services/api';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { registerUser } from '../../services/api.js';
 
-
-const Register = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function Register() {
   const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(null);
     setLoading(true);
+
     try {
-      await registerUser(formData);
-      navigate('/login');
+      // Sends: { name, email, password } to POST /register [cite: 153]
+      const data = await registerUser({ name, email, password });
+      
+      // Response: { "message": "User created successfully" }
+      if (data) {
+        navigate('/login');
+      }
     } catch (err) {
-      setError(err.response?.data?.msg || 'Registration failed. Try again.');
+      setError(err?.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-900">
-      <div className="auth-card">
-        <div className="text-center mb-10">
-          <h2 className="text-4xl font-extrabold text-white tracking-tight">Join EduFlow</h2>
-          <p className="text-gray-400 mt-2">Get started with AI academic planning</p>
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-xl mb-6 text-sm text-center">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="form-label">Full Name</label>
-            <input 
-              type="text" required className="studysync-input"
-              placeholder="Thanvith MK"
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+    <div className="pageWrap flex items-center justify-center min-h-screen">
+      <div className="card authCard bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-700 w-full max-w-md">
+        <h1 className="pageTitle text-2xl font-bold mb-6 text-center">Register</h1>
+        <form className="form flex flex-col gap-4" onSubmit={onSubmit}>
+          <label className="label flex flex-col gap-1">
+            Name
+            <input
+              className="input p-2 bg-gray-900 rounded border border-gray-700 outline-none focus:border-blue-500"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
             />
-          </div>
-
-          <div>
-            <label className="form-label">Email Address</label>
-            <input 
-              type="email" required className="studysync-input"
-              placeholder="thanvith@example.com"
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+          </label>
+          <label className="label flex flex-col gap-1">
+            Email
+            <input
+              className="input p-2 bg-gray-900 rounded border border-gray-700 outline-none focus:border-blue-500"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
-          </div>
-
-          <div>
-            <label className="form-label">Password</label>
-            <input 
-              type="password" required className="studysync-input"
-              placeholder="••••••••"
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+          </label>
+          <label className="label flex flex-col gap-1">
+            Password
+            <input
+              className="input p-2 bg-gray-900 rounded border border-gray-700 outline-none focus:border-blue-500"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
-          </div>
+          </label>
 
-          <button type="submit" disabled={loading} className="btn-primary mt-2">
-            {loading ? 'Creating account...' : 'Create Account'}
+          {error && <div className="errorText text-red-400 text-sm">{error}</div>}
+
+          <button 
+            className="button bg-blue-600 hover:bg-blue-700 transition p-2 rounded font-bold mt-2" 
+            type="submit" 
+            disabled={loading}
+          >
+            {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
-        <p className="mt-8 text-center text-gray-400 text-sm">
-          Already have an account? <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium">Login</Link>
-        </p>
+        <div className="authFooter mt-6 text-center text-sm text-gray-400">
+          <span>Already have an account? </span>
+          <Link to="/login" className="link text-blue-400 hover:underline">
+            Login
+          </Link>
+        </div>
       </div>
     </div>
   );
-};
-
-export default Register;
+}

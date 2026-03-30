@@ -1,44 +1,62 @@
-import axios from 'axios';
+import axios from 'axios'
 
-// Using 127.0.0.1 to match your Flask terminal exactly
-const API_BASE_URL = 'http://127.0.0.1:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-});
+})
 
-// Automatically add JWT token to every request if it exists
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, (error) => Promise.reject(error));
+// Helper to attach the JWT token to requests [cite: 150, 177]
+const authHeaders = (token) => (token ? { headers: { Authorization: `Bearer ${token}` } } : {})
 
-export const loginUser = async (credentials) => {
-  const res = await api.post('/login', credentials);
-  return res.data;
-};
+// 1️⃣ Auth Endpoints 
+export const loginUser = async ({ email, password }) => {
+  const res = await api.post('/login', { email, password })
+  return res.data
+}
 
-export const registerUser = async (userData) => {
-  const res = await api.post('/register', userData);
-  return res.data;
-};
-export const getTasks = async () => {
-  const res = await api.get('/tasks');
-  return res.data;
-};
+export const registerUser = async ({ name, email, password }) => {
+  const res = await api.post('/register', { name, email, password })
+  return res.data
+}
 
-export const predictTaskTime = async (taskData) => {
-  // This calls your Flask ML route
-  const res = await api.post('/tasks/predict', taskData);
-  return res.data;
-};
+// 2️⃣ Machine Learning Layer [cite: 109, 217]
+// Logic: UI -> /predict -> Flask -> ML Service -> Return hours
+export const predictTask = async (taskData, token) => {
+  const res = await api.post('/predict', taskData, authHeaders(token))
+  return res.data
+}
 
-export const saveTask = async (taskData) => {
-  const res = await api.post('/tasks', taskData);
-  return res.data;
-};
-// We'll add predictTask and others here later!
-export default api;
+// 3️⃣ Task Management [cite: 112, 217]
+export const saveTask = async (taskData, token) => {
+  const res = await api.post('/tasks', taskData, authHeaders(token))
+  return res.data
+}
+
+export const getTasks = async (token) => {
+  const res = await api.get('/tasks', authHeaders(token))
+  return res.data
+}
+
+export const deleteTask = async (taskId, token) => {
+  const res = await api.delete(`/tasks/${taskId}`, authHeaders(token))
+  return res.data
+}
+
+// 4️⃣ Fixed Commitments [cite: 193, 217]
+export const addFixedCommitment = async (payload, token) => {
+  const res = await api.post('/fixed-commitments', payload, authHeaders(token))
+  return res.data
+}
+
+export const getFixedCommitments = async (token) => {
+  const res = await api.get('/fixed-commitments', authHeaders(token))
+  return res.data
+}
+
+// 5️⃣ Scheduler Execution [cite: 114, 217]
+// Logic: UI -> /generate-schedule -> Flask -> Process -> Store/Return JSON
+export const generateSchedule = async (data, token) => {
+  const res = await api.post('/generate-schedule', data, authHeaders(token))
+  return res.data
+}
