@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -21,9 +22,10 @@ export const registerUser = async ({ name, email, password }) => {
 }
 
 // 2️⃣ Machine Learning Layer [cite: 109, 217]
-// Logic: UI -> /predict -> Flask -> ML Service -> Return hours
+// In src/services/api.js:
 export const predictTask = async (taskData, token) => {
-  const res = await api.post('/predict', taskData, authHeaders(token))
+  // Update the path to include /tasks/
+  const res = await api.post('/tasks/predict', taskData, authHeaders(token)) 
   return res.data
 }
 
@@ -43,17 +45,26 @@ export const deleteTask = async (taskId, token) => {
   return res.data
 }
 
-// 4️⃣ Fixed Commitments [cite: 193, 217]
+// 1. Update the POST/Add function
 export const addFixedCommitment = async (payload, token) => {
-  const res = await api.post('/fixed-commitments', payload, authHeaders(token))
+  const res = await api.post('/fixed_commitments', payload, authHeaders(token)) // Use underscore
   return res.data
 }
 
+// 2. Update the GET/Load function
 export const getFixedCommitments = async (token) => {
-  const res = await api.get('/fixed-commitments', authHeaders(token))
+  const res = await api.get('/fixed_commitments', authHeaders(token)) // Use underscore
   return res.data
 }
 
+// 3. Update the DELETE function
+export const deleteFixedCommitment = async (fixedCommitmentId, token) => {
+  const res = await api.delete(
+    `/fixed_commitments/${fixedCommitmentId}`, // Use underscore
+    authHeaders(token)
+  )
+  return res.data
+}
 // 5️⃣ Scheduler Execution [cite: 114, 217]
 // Logic: UI -> /generate-schedule -> Flask -> Process -> Store/Return JSON
 export const generateSchedule = async (data, token) => {
