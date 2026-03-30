@@ -7,6 +7,7 @@ export default function PredictionResult({ prediction }) {
   const [error, setError] = useState(null);
   const token = localStorage.getItem('token');
 
+
   // Handle the "Add to Schedule" button click
   const handleAddToSchedule = async () => {
     if (!prediction || !prediction.fullTaskDetails) return;
