@@ -64,53 +64,74 @@ export default function TaskForm({ onPredict }) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-gray-400">Type</label>
-          <select 
-            className="p-2 bg-gray-900 rounded border border-gray-700 outline-none"
-            value={formData.task_type}
-            onChange={(e) => setFormData({...formData, task_type: e.target.value})}
-          >
-            <option value="programming">Programming</option>
-            <option value="research">Research</option>
-            <option value="theory">Theory</option>
-          </select>
-        </div>
+  {/* Task Type Dropdown */}
+  <div className="flex flex-col gap-1">
+    <label className="text-sm text-gray-400">Task Type</label>
+    <select 
+      className="p-2 bg-gray-900 rounded border border-gray-700 outline-none text-white"
+      value={formData.task_type}
+      onChange={(e) => setFormData({...formData, task_type: e.target.value})}
+    >
+      <option value="programming">Programming</option>
+      <option value="research">Research</option>
+      <option value="presentation">Presentation</option>
+      <option value="lab_work">Lab Work</option>
+      <option value="exam_preparation">Exam Prep</option>
+      <option value="project">Project</option>
+    </select>
+  </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-gray-400">Subject</label>
-          <select 
-            className="p-2 bg-gray-900 rounded border border-gray-700 outline-none"
-            value={formData.subject}
-            onChange={(e) => setFormData({...formData, subject: e.target.value})}
-          >
-            <option value="machine_learning">Machine Learning</option>
-            <option value="data_structures">Data Structures</option>
-            <option value="web_dev">Web Development</option>
-          </select>
-        </div>
-      </div>
+  {/* Subject Dropdown */}
+  <div className="flex flex-col gap-1">
+    <label className="text-sm text-gray-400">Subject</label>
+    <select 
+      className="p-2 bg-gray-900 rounded border border-gray-700 outline-none text-white"
+      value={formData.subject}
+      onChange={(e) => setFormData({...formData, subject: e.target.value})}
+    >
+      <option value="machine_learning">Machine Learning</option>
+      <option value="data_science">Data Science</option>
+      <option value="mathematics">Mathematics</option>
+      <option value="computer_science">Computer Science</option>
+      <option value="software_engineering">Software Engineering</option>
+      <option value="web_development">Web Development</option>
+      <option value="database_systems">Database Systems</option>
+    </select>
+  </div>
+</div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-gray-400">Complexity (1-5)</label>
-          <input
-            type="number" min="1" max="5"
-            className="p-2 bg-gray-900 rounded border border-gray-700"
-            value={formData.complexity}
-            onChange={(e) => setFormData({...formData, complexity: e.target.value})}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-gray-400">Days Until Due</label>
-          <input
-            type="number" min="1"
-            className="p-2 bg-gray-900 rounded border border-gray-700"
-            value={formData.days_until_due}
-            onChange={(e) => setFormData({...formData, days_until_due: e.target.value})}
-          />
-        </div>
-      </div>
+{/* New Row for Numerical Metrics (Optional but recommended based on your data) */}
+<div className="grid grid-cols-3 gap-4 mt-4">
+  <div className="flex flex-col gap-1">
+    <label className="text-sm text-gray-400">Complexity (1-5)</label>
+    <input 
+      type="number" min="1" max="5"
+      className="p-2 bg-gray-900 rounded border border-gray-700 outline-none text-white"
+      value={formData.complexity}
+      onChange={(e) => setFormData({...formData, complexity: parseInt(e.target.value)})}
+    />
+  </div>
+  
+  <div className="flex flex-col gap-1">
+    <label className="text-sm text-gray-400">Team Size</label>
+    <input 
+      type="number" min="1"
+      className="p-2 bg-gray-900 rounded border border-gray-700 outline-none text-white"
+      value={formData.team_size}
+      onChange={(e) => setFormData({...formData, team_size: parseInt(e.target.value)})}
+    />
+  </div>
+
+  <div className="flex flex-col gap-1">
+    <label className="text-sm text-gray-400">Days Until Due</label>
+    <input 
+      type="number" min="0"
+      className="p-2 bg-gray-900 rounded border border-gray-700 outline-none text-white"
+      value={formData.days_until_due}
+      onChange={(e) => setFormData({...formData, days_until_due: parseInt(e.target.value)})}
+    />
+  </div>
+</div>
 
       {error && <p className="text-red-400 text-xs">{error}</p>}
 
