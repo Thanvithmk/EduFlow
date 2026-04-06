@@ -42,8 +42,10 @@ def create_app():
     from app.routes.auth_routes import auth_bp
     from app.routes.task_routes import tasks_bp,tasks_ml_bp
     from app.routes.fixed_routes import fixed_bp
+    from app.routes.schedule_routes import schedule_bp
     app.register_blueprint(auth_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(fixed_bp)
     app.register_blueprint(tasks_ml_bp)
+    app.register_blueprint(schedule_bp)
     return app
